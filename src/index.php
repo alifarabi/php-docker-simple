@@ -1,29 +1,49 @@
 <?php
 
-echo "Hello from the docker yooooo container";
+echo "Hello from the docker yooooo container 2";
+// get request header 
+echo "<pre>";
+print_r(arrayToJson($_SERVER));
+echo "</pre>";
+// get request from wocommerce hook
+$myRequest = $_REQUEST;
+// get the order id
+$order_id = $myRequest['order_id'];
+// get random string
+$randomString = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10);
 
-$mysqli = new mysqli("db", "root", "example", "company1");
-
-$sql = "INSERT INTO users (name, fav_color) VALUES('Lil Sneazy', 'Yellow')";
-$result = $mysqli->query($sql);
-$sql = "INSERT INTO users (name, fav_color) VALUES('Nick Jonas', 'Brown')";
-$result = $mysqli->query($sql);
-$sql = "INSERT INTO users (name, fav_color) VALUES('Maroon 5', 'Maroon')";
-$result = $mysqli->query($sql);
-$sql = "INSERT INTO users (name, fav_color) VALUES('Tommy Baker', '043A2B')";
-$result = $mysqli->query($sql);
+$redis_key = '';
+if ($order_id) {
+    $redis_key = $order_id;
+} else {
+    $redis_key = $randomString;
+}
 
 
-$sql = 'SELECT * FROM users';
+// save request on log file
+file_put_contents('log.txt', print_r($myRequest, true), FILE_APPEND);
 
-if ($result = $mysqli->query($sql)) {
-    while ($data = $result->fetch_object()) {
-        $users[] = $data;
+// save order on redis database
+$redis = new Redis();
+$redis->connect('redis', 6379);
+$redis->set($randomString, arrayToJson($_SERVER));
+
+
+?>
+
+<?php 
+// function to stringfy the array request
+function arrayToString($array) {
+    $string = '';
+    foreach ($array as $key => $value) {
+        $string .= $key . ' => ' . $value . ', ';
     }
+    return $string;
 }
 
-foreach ($users as $user) {
-    echo "<br>";
-    echo $user->name . " " . $user->fav_color;
-    echo "<br>";
+// function array to json
+function arrayToJson($array) {
+    $json = json_encode($array);
+    return $json;
 }
+?>

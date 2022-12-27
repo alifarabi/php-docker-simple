@@ -11,14 +11,21 @@ services:
     volumes:
       - ./src:/var/www/html/
 
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
+  # redis
+  redis:
+    image: redis
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-    volumes:
-      - mysql-data:/var/lib/mysql
+    ports:
+      - 6379:6379
+
+  # db:
+  #   image: mysql
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: example
+  #   volumes:
+  #     - mysql-data:/var/lib/mysql
 
   adminer:
     image: adminer
